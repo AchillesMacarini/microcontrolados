@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "button.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -64,6 +65,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
   uint32_t i;
+  uint16_t leds;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -92,15 +94,26 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    for (i = 0; i < 13; i++)
-    {
-      HAL_GPIO_WritePin(KIT_LED_GPIO_Port, KIT_LED_Pin, 0);
-      HAL_Delay(25);
-      HAL_GPIO_WritePin(KIT_LED_GPIO_Port, KIT_LED_Pin, 1);
-      HAL_Delay(50);
+    
+    if(button_release(GPIOB,BTN1_Pin,0)){
+      HAL_GPIO_WritePin(GPIOA,leds,0);
+      switch (leds)
+      {
+      case(0):
+        leds = LED1_Pin;
+        break;
+      case(LED5_Pin):
+        leds = 0;
+        break;
+      default:
+        leds = leds << 1;
+        break;
+      }
+      HAL_GPIO_WritePin(GPIOA,leds,1);
     }
-    HAL_Delay(800);
-
+    HAL_GPIO_TogglePin(GPIOC,KIT_LED_Pin);
+    HAL_Delay(405);
+    
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -161,14 +174,21 @@ void SystemClock_Config(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(KIT_LED_GPIO_Port, KIT_LED_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, LED1_Pin|LED2_Pin|LED3_Pin|LED4_Pin
+                          |LED5_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : KIT_LED_Pin */
   GPIO_InitStruct.Pin = KIT_LED_Pin;
@@ -177,6 +197,23 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(KIT_LED_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : LED1_Pin LED2_Pin LED3_Pin LED4_Pin
+                           LED5_Pin */
+  GPIO_InitStruct.Pin = LED1_Pin|LED2_Pin|LED3_Pin|LED4_Pin
+                          |LED5_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : BTN1_Pin */
+  GPIO_InitStruct.Pin = BTN1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(BTN1_GPIO_Port, &GPIO_InitStruct);
+
+/* USER CODE BEGIN MX_GPIO_Init_2 */
+/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
